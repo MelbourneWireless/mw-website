@@ -4,5 +4,6 @@
 #
 #    pip-compile --output-file requirements-prod.txt requirements-prod.in
 #
-Django==1.10.6
+django-localflavor==1.4.1
+django==1.10.6
 psycopg2==2.7

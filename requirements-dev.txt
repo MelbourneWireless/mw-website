@@ -7,7 +7,8 @@
 astroid==1.4.9            # via pylint, pylint-celery, pylint-flask, pylint-plugin-utils, requirements-detector
 click==6.7                # via pip-tools
 django-extensions==1.7.7
-Django==1.10.6
+django-localflavor==1.4.1
+django==1.10.6
 dodgy==0.1.9              # via prospector
 first==2.0.1              # via pip-tools
 isort==4.2.5              # via pylint
