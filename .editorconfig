@@ -1,0 +1,35 @@
+# EditorConfig helps developers define and maintain consistent
+# coding styles between different editors and IDEs
+# http://editorconfig.org/
+
+# This file is the single source of truth for our project.
+root = true
+
+[*]
+# Our project defaults for all file types.
+indent_style = tab
+indent_size = 4
+max_line_length = 200
+end_of_line = lf
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+# Exceptions to the defaults are below, and only because they are *necessary*.
+
+[Makefile]
+# Makefiles need real tabs.
+indent_style = tab
+indent_size = 4
+
+[*.py]
+indent_style = space
+
+[*.feature]
+# BDD feature files
+indent_style = tab
+
+[*.md]
+# Markdown trailing whitespace is significant, we must indent *every line* for code blocks,
+# including blank lines: http://daringfireball.net/projects/markdown/syntax#precode
+trim_trailing_whitespace = false
