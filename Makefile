@@ -56,6 +56,12 @@ lint:
 	prospector
 
 
+clean += clean_python
+.PHONY: clean_python
+clean_python:
+	find . -name \*.pyc -or -name __pycache__ -print0 | xargs -0 rm -rf
+
+
 all += $(wildcard requirements-*.txt)
 requirements-%.txt: requirements-%.in
 	pip-compile ${PIP_COMPILE_OPTS} --annotate --output-file "$@" "$<"
@@ -64,3 +70,6 @@ requirements-dev.txt: requirements-prod.txt
 
 
 all: $(all)
+
+
+clean: $(clean)
