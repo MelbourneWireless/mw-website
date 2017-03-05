@@ -1,0 +1,3 @@
+-r requirements-prod.txt  # source from prod so that dev env matches prod
+pip-tools
+prospector
