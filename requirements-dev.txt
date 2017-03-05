@@ -6,6 +6,7 @@
 #
 astroid==1.4.9            # via pylint, pylint-celery, pylint-flask, pylint-plugin-utils, requirements-detector
 click==6.7                # via pip-tools
+django-extensions==1.7.7
 Django==1.10.6
 dodgy==0.1.9              # via prospector
 first==2.0.1              # via pip-tools
@@ -28,5 +29,5 @@ pylint==1.6.5             # via prospector, pylint-celery, pylint-common, pylint
 pyyaml==3.12              # via prospector
 requirements-detector==0.5.2  # via prospector
 setoptconf==0.2.0         # via prospector
-six==1.10.0               # via astroid, pip-tools, pylint
+six==1.10.0               # via astroid, django-extensions, pip-tools, pylint
 wrapt==1.10.8             # via astroid
