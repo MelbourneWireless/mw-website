@@ -13,7 +13,6 @@ from django.contrib.gis.db import models
 from localflavor.au.au_states import STATE_CHOICES
 from localflavor.au.forms import AUPostCodeField, AUPhoneNumberField
 
-from django.contrib.auth import models as auth
 import hashlib
 
 CARD_STATUS_CHOICES = (
@@ -92,6 +91,7 @@ class UserManager:
     supports_object_permissions = False
     supports_anonymous_user = False
     def authenticate(self, username=None, password=None):
+        from django.contrib.auth import models as auth
         # Always validate user supplied inputs!
         if 1 > len(username) > 10:
             return None
