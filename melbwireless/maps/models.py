@@ -185,6 +185,7 @@ class Committee(Member):
         db_table = u'committee'
         ordering = ['-year_ending', 'position']
 
+"""
 class HotspotLog(models.Model):
     id = models.CharField(max_length=9, primary_key=True, db_column='hotspot_id')
     when = models.DateTimeField(null=True, blank=True, db_column='time')
@@ -197,6 +198,7 @@ class HotspotLog(models.Model):
     message = models.CharField(max_length=765, blank=True)
     class Meta:
         db_table = u'hotspot_log'
+"""
 
 class Log(models.Model):
     id = models.AutoField(primary_key=True)
@@ -209,6 +211,7 @@ class Log(models.Model):
     class Meta:
         db_table = u'log'
 
+"""
 class MailQueue(models.Model):
     id = models.AutoField(primary_key=True)
     created = models.DateTimeField(db_column='create_time')
@@ -224,12 +227,13 @@ class MailQueue(models.Model):
     delete_after_send = models.BooleanField()
     class Meta:
         db_table = u'mail_queue'
-
+"""
+"""
 class MailQueueSeq(models.Model):
     id = models.AutoField(primary_key=True)
     class Meta:
         db_table = u'mail_queue_seq'
-
+"""
 '''
 class Menu(models.Model):
     id = models.CharField(max_length=30, db_column='menuID', primary_key=True) # Field name made lowercase.
@@ -491,6 +495,7 @@ class Statistic(models.Model):
         db_table = u'stats'
         ordering = ['-date']
 
+"""
 class TibOffer(models.Model):
     id = models.AutoField(primary_key=True)
     created = models.DateTimeField(db_column='timestamp')
@@ -523,3 +528,4 @@ class TibPurchase(models.Model):
         db_table = u'tib_purchase'
         ordering = ['-id']
 
+"""
