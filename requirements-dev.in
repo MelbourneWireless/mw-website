@@ -2,3 +2,4 @@
 django-extensions
 pip-tools
 prospector
+MySQL-python # https://stackoverflow.com/questions/2952187/getting-error-loading-mysqldb-module-no-module-named-mysqldb-have-tried-pre#4169790
