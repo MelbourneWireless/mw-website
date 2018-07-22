@@ -33,7 +33,7 @@ class Member(models.Model):
     postcode = models.CharField(max_length=18)
     email = models.EmailField(max_length=150)
     occupation = models.CharField(max_length=90)
-    dob = models.DateField()
+    dob = models.DateField(blank=True, null=True)
     skills = models.TextField()
     heard = models.TextField()
     expect = models.TextField()
@@ -41,7 +41,7 @@ class Member(models.Model):
     member_of = models.TextField(db_column='memberOf')
     spend = models.CharField(max_length=60)
     applied = models.DateField(db_column='appliedDate')
-    approved = models.DateField(db_column='approvedDate')
+    approved = models.DateField(db_column='approvedDate', blank=True, null=True)
     comments = models.TextField()
     membership_card = models.IntegerField(db_column='cardStatus', choices=CARD_STATUS_CHOICES)
     def __unicode__(self):
@@ -80,12 +80,18 @@ class MemberPayment(models.Model):
     end_date = models.DateField(db_column='endDate') # Field name made lowercase.
     paid = models.BooleanField()
     card = models.BooleanField()
-    receipt = models.ForeignKey('Receipt', db_column='receiptNo') # Field name made lowercase.
+    receipt = models.ForeignKey('Receipt', db_column='receiptNo', null=True) # Field name made lowercase.
     def __unicode__(self):
         return u'%s to %s, receipt #%d (%s)' % (self.start_date, self.end_date, self.receipt_id, self.member)
     class Meta:
         db_table = u'membersYears'
         ordering = ['id']
+    def __init__(self, *args, **kwargs):
+        try:
+            kwargs['receipt_id'] = kwargs['receipt_id'] or None
+        except KeyError:
+            pass
+        super(MemberPayment, self).__init__(*args, **kwargs)
 
 class UserManager:
     supports_object_permissions = False
@@ -113,14 +119,14 @@ class User(models.Model):
     password = models.CharField(max_length=96)
     email_confirmed = models.BooleanField(db_column='confirm')
     membership = models.ForeignKey('Member', db_column='memberNo', blank=True, null=True) # Field name made lowercase.
-    theme = models.CharField(max_length=60, blank=True)
+    theme = models.CharField(max_length=60, blank=True, null=True)
     address = models.CharField(max_length=765)
     phone = models.CharField(max_length=45)
     last_ip = models.CharField(max_length=48)
     last_seen = models.DateTimeField(null=True, blank=True)
     failed_attempts = models.IntegerField(db_column='failedAttempts') # Field name made lowercase.
     registered = models.DateField(db_column='registeredDate') # Field name made lowercase.
-    unconfirmed_email = models.EmailField(max_length=150, blank=True, db_column='email_unconfirmed')
+    unconfirmed_email = models.EmailField(max_length=150, blank=True, db_column='email_unconfirmed', null=True)
     subscribed = models.IntegerField(null=True, blank=True)
     adv = models.IntegerField(null=True, blank=True)
     objects = UserManager()
@@ -131,6 +137,12 @@ class User(models.Model):
     class Meta:
         db_table = u'users'
         ordering = ['id']
+    def __init__(self, *args, **kwargs):
+        try:
+            kwargs['membership_id'] = kwargs['membership_id'] or None
+        except KeyError:
+            pass
+        super(User, self).__init__(*args, **kwargs)
 
 """
 class Group(models.Model):
@@ -165,8 +177,8 @@ class Area(models.Model):
     max_long = models.FloatField(db_column='maxLong')
     mailing_list = models.CharField(max_length=300, db_column='mailingList')
     description = models.TextField()
-    wiki = models.TextField(blank=True, db_column='wikiurl')
-    newsgroup = models.CharField(max_length=450, blank=True)
+    wiki = models.TextField(blank=True, db_column='wikiurl', null=True)
+    newsgroup = models.CharField(max_length=450, blank=True, null=True)
     def __unicode__(self):
         return u'%s' % self.name
     def get_absolute_url(self):
@@ -279,13 +291,13 @@ NODE_STATUS_CHOICES = (
 class Node(models.Model):
     id = models.CharField(max_length=9, primary_key=True)
     name = models.CharField(max_length=90)
-    owner = models.ForeignKey('User', db_column='owner')
+    owner = models.ForeignKey('User', db_column='owner', null=True)
     suburb = models.CharField(max_length=90)
     latitude = models.FloatField()
     longitude = models.FloatField()
     altitude = models.FloatField(null=True, blank=True)
     url = models.CharField(max_length=180)
-    area = models.ForeignKey('Area', blank=True, db_column='area')
+    area = models.ForeignKey('Area', blank=True, db_column='area', null=True)
     status = models.CharField(max_length=36, choices=NODE_STATUS_CHOICES)
     updated = models.DateTimeField()
     old_password = models.CharField(max_length=120, db_column='oldPassword')
@@ -298,11 +310,28 @@ class Node(models.Model):
     class Meta:
         db_table = u'nodes'
         ordering = ['id']
+    def __init__(self, *args, **kwargs):
+        try:
+            kwargs['area_id'] = kwargs['area_id'] if kwargs['area_id'] not in {-1, 0} else None
+        except KeyError:
+            pass
+        try:
+            kwargs['owner_id'] = kwargs['owner_id'] or None
+        except KeyError:
+            pass
+        super(Node, self).__init__(*args, **kwargs)
+
+    _valid_ids = None
+    @classmethod
+    def valid_ids(cls):
+        if cls._valid_ids is None:
+            cls._valid_ids = frozenset(cls.objects.values_list('id', flat=True))
+        return cls._valid_ids
 
 class NodeScore(models.Model):
     node = models.OneToOneField('Node', primary_key=True, db_column='node')
-    user = models.ForeignKey('User', db_column='username')
-    area = models.ForeignKey('Area', db_column='area')
+    user = models.ForeignKey('User', db_column='username', null=True)
+    area = models.ForeignKey('Area', db_column='area', null=True)
     interfaces = models.IntegerField()
     links = models.IntegerField()
     distance = models.FloatField()
@@ -314,11 +343,33 @@ class NodeScore(models.Model):
     class Meta:
         db_table = u'node_score'
         ordering = ['-score', 'node']
+    def __init__(self, *args, **kwargs):
+        try:
+            kwargs['area_id'] = kwargs['area_id'] if kwargs['area_id'] not in {-1, 0} else None
+        except KeyError:
+            pass
+        try:
+            kwargs['user_id'] = kwargs['user_id'] or None
+        except KeyError:
+            pass
+        super(NodeScore, self).__init__(*args, **kwargs)
+
+class FilterManager(models.Manager):
+    def __init__(self, *node_fields, **kwargs):
+        self.node_fields = node_fields
+        super(FilterManager, self).__init__(**kwargs)
+
+    def get_queryset(self):
+        return super(FilterManager, self).get_queryset().filter(**{
+            '{}_id__in'.format(field): self.model._meta.get_field(field).rel.to.valid_ids()
+            for field in self.node_fields
+        })
 
 class NodeHost(models.Model):
     address = models.CharField(max_length=45, primary_key=True)
     node = models.ForeignKey('Node', db_column='node_id')
     host = models.CharField(max_length=384)
+    objects = FilterManager('node')
     def __unicode__(self):
         return u'%s %s %s' % (self.address, self.host, self.node)
     class Meta:
@@ -374,6 +425,7 @@ NODE_CLASS_CHOICES = (
 class Interface(models.Model):
     id = models.AutoField(primary_key=True, db_column='int_id')
     node = models.ForeignKey('Node', db_column='node')
+    objects = FilterManager('node')
     mac = models.CharField(max_length=60, blank=True)
     card_power = models.IntegerField()
     card_receive = models.IntegerField(null=True, blank=True)
@@ -389,11 +441,19 @@ class Interface(models.Model):
     class Meta:
         db_table = u'nodes_interfaces'
         ordering = ['node', 'id']
+    _valid_ids = None
+    @classmethod
+    def valid_ids(cls):
+        if cls._valid_ids is None:
+            cls._valid_ids = frozenset(cls.objects.values_list('id', flat=True))
+        return cls._valid_ids
+
 
 class NodeIp(models.Model):
     address = models.CharField(max_length=45, primary_key=True)
     subnet = models.IntegerField(null=True, blank=True)
     node = models.ForeignKey('Node', null=True, blank=True, db_column='node_interface')
+    objects = FilterManager('node')
     type = models.CharField(max_length=24, blank=True)
     area = models.IntegerField(null=True, blank=True)
     def __unicode__(self):
@@ -418,6 +478,7 @@ class Link(models.Model):
     id = models.AutoField(primary_key=True, db_column='link_id')
     interface_1 = models.ForeignKey('Interface', related_name='links_1', db_column='interface_1')
     interface_2 = models.ForeignKey('Interface', related_name='links_2', db_column='interface_2')
+    objects = FilterManager('interface_1', 'interface_2')
     link_class = models.CharField(max_length=24, choices=LINK_CLASS_CHOICES, db_column='class', blank=True) # Field renamed because it was a Python reserved word. Field name made lowercase.
     def __unicode__(self):
         return u'%d: %s - %s' % (self.id, self.interface_1, self.interface_2)
@@ -464,6 +525,7 @@ SERVICE_TYPE_CHOICES = (
 class Service(models.Model):
     id = models.AutoField(primary_key=True, db_column='service_id')
     node = models.ForeignKey('Node', db_column='node')
+    objects = FilterManager('node')
     service_type = models.CharField(max_length=36, choices=SERVICE_TYPE_CHOICES, blank=True, db_column='service_type')
     ip = models.CharField(max_length=45, blank=True, db_column='service_ip')
     port = models.CharField(max_length=15, db_column='service_port')
